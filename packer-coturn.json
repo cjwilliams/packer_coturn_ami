@@ -1,0 +1,45 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "aws_region": "us-west-2",
+    "aws_ami_image": "ami-908316f0",
+    "aws_instance_type": "m1.medium",
+    "image_version" : "0.0.1"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `aws_region`}}",
+      "source_ami": "{{user `aws_ami_image`}}",
+      "instance_type": "{{user `aws_instance_type`}}",
+      "ssh_username": "ec2-user",
+      "ami_name": "mayfield-coturn-{{user `image_version`}}",
+      "tags": {
+        "Name": "mayfieldcoturn-{{user `image_version`}}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "initd/coturn",
+      "destination": "/tmp/coturn"
+    },
+    {
+      "type": "file",
+      "source": "config/turnserver.conf",
+      "destination": "/tmp/turnserver.conf"
+    },
+    {
+      "type": "shell",
+      "inline": ["sudo mv /tmp/coturn /etc/init.d/coturn"]
+    },
+    {
+      "type": "shell",
+      "inline": ["sudo mv /tmp/turnserver.conf /etc/turnserver.conf"]
+    }
+  ]
+}

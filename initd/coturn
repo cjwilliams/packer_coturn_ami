@@ -1,0 +1,26 @@
+#!/bin/sh
+
+###############
+MYINTIP=`curl http://169.254.169.254/latest/meta-data/local-ipv4`
+MYEXTIP=`curl http://169.254.169.254/2009-04-04/meta-data/public-ipv4`
+
+sed -ie "s/MFINTIP/${MYINTIP}/g" /etc/turnserver.conf
+sed -ie "s/MFEXTIP/${MYEXTIP}/g" /etc/turnserver.conf
+
+case "$1" in
+    start)
+	pkill turnserver
+        echo "Starting TURN server..."
+	rm -rf /var/log/turn_*
+	LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH} /usr/local/bin/turnserver -o -vvvv
+        ;;
+    stop)
+	pkill turnserver
+        echo "Waiting for TURN server to shutdown ..."
+        sleep 1
+        echo "TURN server stopped"
+        ;;
+    *)
+        echo "Please use start or stop as first argument"
+        ;;
+esac
